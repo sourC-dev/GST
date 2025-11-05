@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Space Technology Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 20px 40px;
+            border-bottom: 2px solid rgba(100, 200, 255, 0.3);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #64b5f6, #42a5f5, #1e88e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #b0bec5;
+            font-size: 1.1em;
+        }
+        
+        .container {
+            display: flex;
+            height: calc(100vh - 120px);
+        }
+        
+        .sidebar {
+            width: 350px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            overflow-y: auto;
+            border-right: 2px solid rgba(100, 200, 255, 0.3);
+        }
+        
+        .tech-category {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tech-category:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .tech-category h3 {
+            font-size: 1.2em;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .tech-category p {
+            font-size: 0.9em;
+            color: #b0bec5;
+            line-height: 1.4;
+        }
+        
+        .map-container {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .region-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid rgba(100, 200, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .region-card:hover {
+            border-color: rgba(100, 200, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(100, 200, 255, 0.2);
+        }
+        
+        .region-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .region-flag {
+            font-size: 3em;
+        }
+        
+        .region-name {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .tag {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid;
+        }
+        
+        .key-players {
+            margin-top: 15px;
+        }
+        
+        .key-players h4 {
+            color: #64b5f6;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .players-list {
+            color: #b0bec5;
+            line-height: 1.8;
+        }
+        
+        /* Color coding for different tech areas */
+        .robotics { border-color: #ff6b6b; }
+        .robotics .tag { border-color: #ff6b6b; color: #ff6b6b; }
+        
+        .propulsion { border-color: #4ecdc4; }
+        .propulsion .tag { border-color: #4ecdc4; color: #4ecdc4; }
+        
+        .communications { border-color: #ffd93d; }
+        .communications .tag { border-color: #ffd93d; color: #ffd93d; }
+        
+        .earth-observation { border-color: #6bcf7f; }
+        .earth-observation .tag { border-color: #6bcf7f; color: #6bcf7f; }
+        
+        .defense { border-color: #c44569; }
+        .defense .tag { border-color: #c44569; color: #c44569; }
+        
+        .deep-space { border-color: #a29bfe; }
+        .deep-space .tag { border-color: #a29bfe; color: #a29bfe; }
+        
+        .energy { border-color: #fd79a8; }
+        .energy .tag { border-color: #fd79a8; color: #fd79a8; }
+        
+        .quantum { border-color: #74b9ff; }
+        .quantum .tag { border-color: #74b9ff; color: #74b9ff; }
+        
+        .materials { border-color: #fab1a0; }
+        .materials .tag { border-color: #fab1a0; color: #fab1a0; }
+        
+        .legend {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .legend h3 {
+            margin-bottom: 15px;
+            color: #64b5f6;
+        }
+        
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 2px solid rgba(100, 200, 255, 0.3);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌍 Global Space Technology Map 2025</h1>
+        <p class="subtitle">Explore cutting-edge space technology areas and who's leading the charge worldwide</p>
+    </div>
+    
+    <div class="container">
+        <div class="sidebar">
+            <h2 style="margin-bottom: 20px; color: #64b5f6;">Major Technology Areas</h2>
+            <div id="tech-categories"></div>
+            
+            <div class="legend">
+                <h3>Legend</h3>
+                <div id="legend-tags" class="tech-tags"></div>
+            </div>
+        </div>
+        
+        <div class="map-container">
+            <h2 style="margin-bottom: 25px; color: #64b5f6;">Regional Capabilities & Leaders</h2>
+            <div id="regions-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // DATA CONFIGURATION - Edit this JSON object to update the map
+        const spaceData = {
+            "metadata": {
+                "title": "Global Space Technology Map",
+                "year": "2025",
+                "lastUpdated": "2025-01-01"
+            },
+            "technologyAreas": [
+                {
+                    "id": "robotics",
+                    "icon": "🤖",
+                    "name": "Space Robotics",
+                    "description": "Autonomous systems for satellite maintenance, debris removal, planetary exploration, and in-space manufacturing. Market growing to $8.47B by 2033.",
+                    "color": "#ff6b6b"
+                },
+                {
+                    "id": "propulsion",
+                    "icon": "🚀",
+                    "name": "Advanced Propulsion",
+                    "description": "Electric propulsion, nuclear electric systems (NEP), and green propulsion for efficient deep space travel and satellite operations.",
+                    "color": "#4ecdc4"
+                },
+                {
+                    "id": "communications",
+                    "icon": "📡",
+                    "name": "Communications",
+                    "description": "Mega-constellations, inter-satellite laser links (100+ Gbps), and optical communications for global connectivity.",
+                    "color": "#ffd93d"
+                },
+                {
+                    "id": "earth-observation",
+                    "icon": "🛰️",
+                    "name": "Earth Observation",
+                    "description": "Climate monitoring satellites providing 50%+ of climate data, air quality tracking, and real-time environmental analysis.",
+                    "color": "#6bcf7f"
+                },
+                {
+                    "id": "defense",
+                    "icon": "🛡️",
+                    "name": "Space Defense & Security",
+                    "description": "Cybersecurity, space superiority, anti-satellite defense, and battle management systems. $58.9B market by 2032.",
+                    "color": "#c44569"
+                },
+                {
+                    "id": "deep-space",
+                    "icon": "🌌",
+                    "name": "Deep Space Exploration",
+                    "description": "Lunar and Mars missions, habitats with 98% resource recycling, and life support systems for long-duration missions.",
+                    "color": "#a29bfe"
+                },
+                {
+                    "id": "energy",
+                    "icon": "⚡",
+                    "name": "Space-Based Energy",
+                    "description": "Space solar power systems capable of 2GW power transmission, wireless power beaming to Earth.",
+                    "color": "#fd79a8"
+                },
+                {
+                    "id": "quantum",
+                    "icon": "⚛️",
+                    "name": "Quantum Technologies",
+                    "description": "Quantum sensors, atomic clocks, entanglement for secure communications, and post-quantum cryptography.",
+                    "color": "#74b9ff"
+                },
+                {
+                    "id": "materials",
+                    "icon": "🧪",
+                    "name": "Advanced Materials",
+                    "description": "3D printing in space, self-healing materials, radiation shielding, and microgravity manufacturing.",
+                    "color": "#fab1a0"
+                }
+            ],
+            "regions": [
+                {
+                    "name": "North America",
+                    "flag": "🇺🇸",
+                    "technologies": [
+                        { "id": "robotics", "label": "Robotics (35% market)" },
+                        { "id": "propulsion", "label": "Advanced Propulsion" },
+                        { "id": "communications", "label": "Mega-Constellations" },
+                        { "id": "deep-space", "label": "Deep Space" },
+                        { "id": "defense", "label": "Space Defense" },
+                        { "id": "quantum", "label": "Quantum Tech" },
+                        { "id": "energy", "label": "Space Solar Power" }
+                    ],
+                    "keyPlayers": [
+                        "NASA: Artemis program, ISS research (4,000+ investigations), JWST operations, Mars missions",
+                        "SpaceX: 104 launches in 2024, Starlink constellation, Starship development, in-orbit refueling",
+                        "Blue Origin: New Glenn rocket (launched Jan 2025), lunar lander programs",
+                        "Lockheed Martin: GPS IIIF, JETSON nuclear propulsion, multi-domain integration",
+                        "Intuitive Machines: Nova-C lunar landers (multiple missions 2025)",
+                        "Amazon (Kuiper): Satellite constellation with laser inter-links",
+                        "Astrobotic: Griffin-1 lunar lander with Astrolab rover"
+                    ]
+                },
+                {
+                    "name": "Europe",
+                    "flag": "🇪🇺",
+                    "technologies": [
+                        { "id": "robotics", "label": "Robotics (€183.5M investment)" },
+                        { "id": "deep-space", "label": "Deep Space" },
+                        { "id": "earth-observation", "label": "Earth Observation" },
+                        { "id": "energy", "label": "Space Solar Power" },
+                        { "id": "communications", "label": "OneWeb Constellation" }
+                    ],
+                    "keyPlayers": [
+                        "ESA: BepiColombo Mercury mission, ISS research, space defense initiatives",
+                        "Eutelsat (OneWeb): Global satellite constellation with inter-satellite links",
+                        "European Commission: €183.5M robotics funding (2023-2025), space solar power R&D",
+                        "Adamant Quanta (Sweden): Chip-scale quantum sensors for space navigation",
+                        "ISPTech: Green propulsion systems (€2M pre-seed funding 2024)"
+                    ]
+                },
+                {
+                    "name": "China",
+                    "flag": "🇨🇳",
+                    "technologies": [
+                        { "id": "communications", "label": "Guowang Constellation" },
+                        { "id": "propulsion", "label": "Electric Propulsion" },
+                        { "id": "energy", "label": "Space Solar Power" },
+                        { "id": "deep-space", "label": "Lunar & Mars Missions" },
+                        { "id": "defense", "label": "Space Defense" }
+                    ],
+                    "keyPlayers": [
+                        "CNSA: Lunar sample return missions, Mars exploration, space station operations",
+                        "Guowang: Mega-constellation program competing with Starlink",
+                        "Cosmo Bee: Electric hall thrusters for satellites (50W-1000W range)",
+                        "Space solar power research programs",
+                        "Quantum satellite communications development"
+                    ]
+                },
+                {
+                    "name": "Japan",
+                    "flag": "🇯🇵",
+                    "technologies": [
+                        { "id": "materials", "label": "Advanced Materials" },
+                        { "id": "deep-space", "label": "Deep Space" },
+                        { "id": "robotics", "label": "Robotics" }
+                    ],
+                    "keyPlayers": [
+                        "JAXA: Hayabusa2 asteroid sample return, ISS experiments (Colloidal Clusters)",
+                        "Advanced materials research in microgravity",
+                        "Optical communications development",
+                        "Lunar exploration partnerships"
+                    ]
+                },
+                {
+                    "name": "United Kingdom",
+                    "flag": "🇬🇧",
+                    "technologies": [
+                        { "id": "energy", "label": "Space Solar Power" },
+                        { "id": "earth-observation", "label": "Earth Observation" },
+                        { "id": "defense", "label": "Space Security" }
+                    ],
+                    "keyPlayers": [
+                        "UK Space Agency: Space solar power research programs",
+                        "Satellite technology development",
+                        "Earth observation systems",
+                        "International partnerships on lunar missions"
+                    ]
+                },
+                {
+                    "name": "India",
+                    "flag": "🇮🇳",
+                    "technologies": [
+                        { "id": "deep-space", "label": "Lunar Missions" },
+                        { "id": "earth-observation", "label": "Earth Observation" },
+                        { "id": "communications", "label": "Launch Services" }
+                    ],
+                    "keyPlayers": [
+                        "ISRO: Chandrayaan lunar missions, Mars orbiter, cost-effective launch services",
+                        "Small satellite launches",
+                        "Earth observation satellites",
+                        "Growing commercial space sector"
+                    ]
+                }
+            ],
+            "globalTrends": {
+                "name": "Global Trends & Statistics 2025",
+                "flag": "🌐",
+                "sections": [
+                    {
+                        "title": "Market Growth",
+                        "items": [
+                            "Space economy projected to reach $1.8 trillion by 2035",
+                            "Space robotics market: $8.47B by 2033 (5.1% CAGR)",
+                            "Aerospace cybersecurity: $58.9B by 2032 (8.4% CAGR)",
+                            "Space semiconductors: $5.68B by 2034 (7.2% CAGR)"
+                        ]
+                    },
+                    {
+                        "title": "Launch Activity",
+                        "items": [
+                            "203+ orbital launches in 2024 (breaking 2023 record)",
+                            "Launch costs reduced by 10x over past decade",
+                            "Multiple commercial lunar missions planned for 2025"
+                        ]
+                    },
+                    {
+                        "title": "Key Technologies",
+                        "items": [
+                            "Space solar power demonstrations (Caltech 2024)",
+                            "Quantum entanglement for communications (SEAQUE experiment)",
+                            "98% resource recycling in space habitats",
+                            "Inter-satellite laser links (100+ Gbps)",
+                            "AI-driven autonomous systems",
+                            "Self-healing spacecraft materials"
+                        ]
+                    },
+                    {
+                        "title": "Investment",
+                        "items": [
+                            "Government defense space programs: $73B in 2024 (54% of space budgets)",
+                            "Venture capital: $200M+ for space robotics firms (last 3 years)",
+                            "Increased democratization: 'Low Earth orbit available to everyone'"
+                        ]
+                    }
+                ]
+            }
+        };
+
+        // RENDERING FUNCTIONS - Don't edit unless you want to change the layout
+        function renderTechnologyAreas() {
+            const container = document.getElementById('tech-categories');
+            const legendContainer = document.getElementById('legend-tags');
+            
+            spaceData.technologyAreas.forEach(tech => {
+                // Sidebar category
+                const category = document.createElement('div');
+                category.className = `tech-category ${tech.id}`;
+                category.innerHTML = `
+                    <h3>${tech.icon} ${tech.name}</h3>
+                    <p>${tech.description}</p>
+                `;
+                container.appendChild(category);
+                
+                // Legend tag
+                const tag = document.createElement('span');
+                tag.className = `tag ${tech.id}`;
+                tag.textContent = tech.name;
+                legendContainer.appendChild(tag);
+            });
+        }
+
+        function renderRegions() {
+            const container = document.getElementById('regions-container');
+            
+            spaceData.regions.forEach(region => {
+                const card = document.createElement('div');
+                card.className = 'region-card';
+                
+                const techTags = region.technologies.map(tech => 
+                    `<span class="tag ${tech.id}">${tech.label}</span>`
+                ).join('');
+                
+                const players = region.keyPlayers.map(player => 
+                    `• <strong>${player.split(':')[0]}</strong>: ${player.split(':')[1] || ''}`
+                ).join('<br>');
+                
+                card.innerHTML = `
+                    <div class="region-header">
+                        <span class="region-flag">${region.flag}</span>
+                        <span class="region-name">${region.name}</span>
+                    </div>
+                    <div class="tech-tags">${techTags}</div>
+                    <div class="key-players">
+                        <h4>Key Players & Achievements:</h4>
+                        <div class="players-list">${players}</div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            // Add global trends
+            renderGlobalTrends(container);
+        }
+
+        function renderGlobalTrends(container) {
+            const trends = spaceData.globalTrends;
+            const card = document.createElement('div');
+            card.className = 'region-card';
+            card.style.background = 'linear-gradient(135deg, rgba(100, 181, 246, 0.1), rgba(66, 165, 245, 0.1))';
+            
+            const sections = trends.sections.map(section => {
+                const items = section.items.map(item => `• ${item}`).join('<br>');
+                return `<h4>${section.title}:</h4>${items}<br><br>`;
+            }).join('');
+            
+            card.innerHTML = `
+                <div class="region-header">
+                    <span class="region-flag">${trends.flag}</span>
+                    <span class="region-name">${trends.name}</span>
+                </div>
+                <div class="players-list">${sections}</div>
+            `;
+            
+            container.appendChild(card);
+        }
+
+        // Initialize the page
+        renderTechnologyAreas();
+        renderRegions();
+    </script>
+</body>
+</html>
